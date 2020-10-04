@@ -7,18 +7,20 @@ px db 160
 
 
 player_start:
+	
 	;select slot #0
-	ld a, 0
-	ld bc, $303b
+	ld a,0
+	ld bc,$303b
 	out (c), a
-
 
 
 	;send pattern data
 	; call set_current_anim_frame
-	ld hl,Sprite1
+	ld hl,Sprite0
 	ld bc,0x005b
 	otir
+
+	
 
 	ret
 
@@ -64,7 +66,7 @@ player_draw:
 
 
 	;select slot #0
-	ld a, 0
+	ld a,0
 	ld bc, $303b
 	out (c), a
 

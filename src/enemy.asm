@@ -20,13 +20,15 @@ enemy_start:
 	ld bc,0x005b
 	otir
 
+
+
     ret
 
 ;isalive,x,y
 enemies:
     db FACE,40,60,1
-    db FACE,60,60,2
-    db FACE,80,60,3
+    db FACE,80,60,2
+    db FACE,120,60,3
     db 255
 ENEMIES_DATA_LENGTH equ 3
 
@@ -60,10 +62,10 @@ e_drw:
 	;TODO: What TF!!!!! is the 'slot' for ???
 
 
-    ;select slot 
-	ld a,1
-	ld bc, $303b
-	out (c), a
+    ; ;select slot 
+	; ld a,1
+	; ld bc, $303b
+	; out (c), a
 
 
 	
@@ -90,34 +92,32 @@ e_drw:
 	out (c),a
 
 	;zoom
-	ld a,%00101000
+	ld a,%00100000
 	out (c),a
 
-
     ret
-
-    ld de,ENEMIES_DATA_LENGTH
-    add ix,de
-    jp e_drw
+    ; ld de,ENEMIES_DATA_LENGTH
+    ; add ix,de
+    ; jp e_drw
 	
 
 
 
 
 
-enemy_set_sprite:
-    ld a,(ix)
-    cp FACE 
-	jp z,load_sprite_face
-	cp INVADER 
-	jp z,load_sprite_invader
-	ret
+; enemy_set_sprite:
+;     ld a,(ix)
+;     cp FACE 
+; 	jp z,load_sprite_face
+; 	cp INVADER 
+; 	jp z,load_sprite_invader
+; 	ret
 
-load_sprite_face:
-	ld hl,Sprite2
-	ret
+; load_sprite_face:
+; 	ld hl,Sprite2
+; 	ret
 
-load_sprite_invader:
-	ld hl,Sprite1
-	ret
+; load_sprite_invader:
+; 	ld hl,Sprite1
+; 	ret
 

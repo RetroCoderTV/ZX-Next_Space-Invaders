@@ -1,7 +1,7 @@
 game_start: 
     call background_paint
-    call enemy_start
     call player_start
+    call enemy_start
     ret
 
 game_update:
@@ -11,9 +11,9 @@ game_update:
     call check_keys
 
 
-    call enemy_update
-	call player_update
     
+	call player_update
+    call enemy_update
 
 	ret
 
