@@ -9,7 +9,18 @@ enemy_current_anim_frame db 0
 ENEMY_TOTAL_ANIM_FRAMES equ 2
 
 
+enemy_start:
+    ;select slot 
+	ld a,1
+	ld bc, $303b
+	out (c), a
 
+	;send pattern data
+    ld hl,Sprite2
+	ld bc,0x005b
+	otir
+
+    ret
 
 ;isalive,x,y
 enemies:
@@ -43,20 +54,19 @@ enemy_increment_anim_frame:
 enemy_draw:
     ld ix,enemies
 e_drw:
-    ld a,(ix)
-    cp 255
-    ret z
+    ; ld a,(ix)
+    ; cp 255
+    ; ret z
 	;TODO: What TF!!!!! is the 'slot' for ???
-	;select slot 
-	ld a,(ix+3)
+
+
+    ;select slot 
+	ld a,1
 	ld bc, $303b
 	out (c), a
 
-	;send pattern data
-	; call enemy_set_sprite
-    ld hl,Sprite2
-	ld bc,0x005b
-	otir
+
+	
 
 
 	;out 0x57, 32:  x position in 32
@@ -82,6 +92,9 @@ e_drw:
 	;zoom
 	ld a,%00101000
 	out (c),a
+
+
+    ret
 
     ld de,ENEMIES_DATA_LENGTH
     add ix,de

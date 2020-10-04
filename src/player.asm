@@ -6,6 +6,24 @@ PLAYER_Y equ 191-16
 px db 160
 
 
+player_start:
+	;select slot #0
+	ld a, 0
+	ld bc, $303b
+	out (c), a
+
+
+
+	;send pattern data
+	; call set_current_anim_frame
+	ld hl,Sprite1
+	ld bc,0x005b
+	otir
+
+	ret
+
+
+
 player_update:
 	call increment_anim_frame
 
@@ -49,14 +67,6 @@ player_draw:
 	ld a, 0
 	ld bc, $303b
 	out (c), a
-
-
-
-	;send pattern data
-	; call set_current_anim_frame
-	ld hl,Sprite1
-	ld bc,0x005b
-	otir
 
 
 

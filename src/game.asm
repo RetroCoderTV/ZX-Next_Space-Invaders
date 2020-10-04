@@ -1,5 +1,7 @@
 game_start: 
     call background_paint
+    call enemy_start
+    call player_start
     ret
 
 game_update:
