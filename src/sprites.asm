@@ -1,3 +1,5 @@
+SPRITE_COUNT equ 3
+
 Sprite0:
 	db  $E3, $E3, $E3, $E3, $E3, $E3, $E3, $00, $00, $E3, $E3, $E3, $E3, $E3, $E3, $E3;
 	db  $E3, $E3, $E3, $E3, $E3, $E3, $00, $6D, $6D, $00, $E3, $E3, $E3, $E3, $E3, $E3;

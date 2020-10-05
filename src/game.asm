@@ -1,7 +1,8 @@
 game_start: 
     call background_paint
-    call player_start
-    call enemy_start
+
+    
+    call init_sprites
     ret
 
 game_update:
@@ -10,10 +11,8 @@ game_update:
 
     call check_keys
 
-
-    
 	call player_update
-    call enemy_update
+
 
 	ret
 
@@ -22,6 +21,24 @@ game_draw:
 	call player_draw
     
 	ret
+
+
+init_sprites:
+	ld a,0							
+	ld bc,$303b					
+	out (c),a						
+	ld hl,Sprite0
+							
+	ld b,SPRITE_COUNT	
+	ld hl,Sprite0
+is_loop:
+	push bc							
+	ld bc,$005b						
+	otir							
+	pop bc 							
+	djnz is_loop					
+	ret 							
+
 
 
 

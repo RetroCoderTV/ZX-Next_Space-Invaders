@@ -6,25 +6,6 @@ PLAYER_Y equ 191-16
 px db 160
 
 
-player_start:
-	
-	;select slot #0
-	ld a,0
-	ld bc,$303b
-	out (c), a
-
-
-	;send pattern data
-	; call set_current_anim_frame
-	ld hl,Sprite0
-	ld bc,0x005b
-	otir
-
-	
-
-	ret
-
-
 
 player_update:
 	call increment_anim_frame
@@ -61,36 +42,23 @@ increment_anim_frame:
 
 
 player_draw:
-	;TODO: What is the 'slot' for ???
 
 
-
-	;select slot #0
+	;select slot
 	ld a,0
 	ld bc, $303b
 	out (c), a
 
-
-
-	;out 0x57, 32:  x position in 32
-	;out 0x57, 32:  y position in 32
-	;out 0x57, 0:  no palette offset and no rotate and mirrors flags
-	;out 0x57, 130:  sprite visible and show pattern #0
 	ld bc, $57
+	;attr 0
 	ld a, (px)
-	out (c), a                                      ; x pos is 16 bit number, if over 255 msb stored below
+	out (c), a    
+
+	;attr 1                                  
 	ld a,PLAYER_Y
-	out (c), a                                      ; y pos
+	out (c), a                                      
 
-
-	; ; bits 7-4 pallete offset
-	; ; bit 3 x mirror
-	; ; bit 2 y mirror
-	; ; bit 1 rotate
-	; ; bit 0 x msb
-	; ; off  xf yf r xmsb
-	; ; 0000 0  0  0 0
-
+	;attr 2
 	ld a,(current_direction)
 	cp LEFT
 	push af
@@ -101,25 +69,16 @@ player_draw:
 	call z,set_flip_bit
 	pop af
 
-	;vis
-	ld a,%11000000
+	;attr 3
+	ld a,%11000001
 	out (c),a
 
-	;zoom
+	;attr 4
 	ld a,%00100000
 	out (c),a
 
 	ret
 
-
-
-set_current_anim_frame:
-	ld a,(current_anim_frame)
-	cp 0 
-	jp z,load_anim_frame_0
-	cp 1 
-	jp z,load_anim_frame_1
-	ret
 
 
 
