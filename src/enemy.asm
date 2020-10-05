@@ -1,6 +1,5 @@
 
 ;Enemy sprite types:
-DEAD equ 0
 FACE equ 1
 INVADER equ 2
 
@@ -8,13 +7,14 @@ enemy_current_direction db LEFT
 enemy_current_anim_frame db 0
 ENEMY_TOTAL_ANIM_FRAMES equ 2
 
-;isalive,x,y
+;isalive,x,y, attri slot, 
 enemies:
     db FACE,40,60,1
-    db FACE,80,60,2
-    db FACE,120,60,3
+    ; db FACE,80,60,2
+    ; db FACE,120,60,3
     db 255
 ENEMIES_DATA_LENGTH equ 4
+
 
 
 

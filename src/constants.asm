@@ -2,6 +2,10 @@ FALSE equ 0
 TRUE equ 1
 
 
+DEAD equ 0
+ALIVE equ 1
+
+
 
 
 ;DIRECTIONS:

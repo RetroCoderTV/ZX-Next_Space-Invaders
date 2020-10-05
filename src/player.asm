@@ -1,4 +1,3 @@
-current_direction db LEFT
 current_anim_frame db 0
 TOTAL_ANIM_FRAMES equ 2
 
@@ -6,10 +5,19 @@ PLAYER_Y equ 191-16
 px db 160
 
 
+ANCHORED equ %00100000
+VISIBILITY equ %10000000
+EXTENDED equ %01000000
+MIRROR_X equ %00001000
+MIRROR_Y equ %00000100
+
+player_attribute_2 db %00000000
+player_attribute_3 db %11000000
+player_attribute_4 db %00100000
+
 
 player_update:
 	call increment_anim_frame
-
 
 	ld a,(keypressed_A)
     cp TRUE
@@ -19,10 +27,20 @@ player_update:
 	cp TRUE
 	jp z,move_right
 
-
-	
+	ld a,(keypressed_Space)
+	cp TRUE
+	jp z, fire_photon_torpedos
 
     ret
+
+
+
+
+
+fire_photon_torpedos:
+	call bullet_spawn
+	ret
+
 
 
 
@@ -37,19 +55,13 @@ increment_anim_frame:
 	ld (current_anim_frame),a
 	ret
 
-
-
-
-
 player_draw:
-
-
 	;select slot
 	ld a,0
-	ld bc, $303b
+	ld bc, $303b ;selection of pattern
 	out (c), a
 
-	ld bc, $57
+	ld bc, $57 ;0x57=attribute writing port
 	;attr 0
 	ld a, (px)
 	out (c), a    
@@ -59,61 +71,24 @@ player_draw:
 	out (c), a                                      
 
 	;attr 2
-	ld a,(current_direction)
-	cp LEFT
-	push af
-	call z,reset_flip_bit
-	pop af
-	cp RIGHT 
-	push af
-	call z,set_flip_bit
-	pop af
+	ld a,(player_attribute_2)
+	out (c),a
 
 	;attr 3
-	ld a,%11000001
+	ld a,(player_attribute_3)
 	out (c),a
 
 	;attr 4
-	ld a,%00100000
+	ld a,(player_attribute_4)
 	out (c),a
 
 	ret
-
-
-
-
-load_anim_frame_0:
-	ld hl,Sprite0
-	ret
-
-load_anim_frame_1:
-	ld hl,Sprite1
-	ret
-
-
-
-set_flip_bit:
-	ld a, %00001000 ;todo set only that bit
-	out (c), a
-	ret
-
-reset_flip_bit:
-	ld a, %00000000
-	out (c), a
-	ret
-
-
-
-
-
-
-
 
 move_right:
 	ld a,(px)
 	add a,1
-	cp 254
-	jp nc, flip_direction
+	cp 250
+	ret nc
 	ld (px),a
 	ret
 
@@ -121,28 +96,8 @@ move_right:
 move_left:
 	ld a,(px)
 	sub 1
-	cp 17
-	jp c, flip_direction
+	cp 8
+	ret c
 	ld (px),a
 	ret
 
-
-
-
-flip_direction:
-	ld a,(current_direction)
-	cp LEFT
-	jp z,set_direction_right
-	cp RIGHT
-	jp z,set_direction_left
-	ret
-
-set_direction_right:
-	ld a,RIGHT
-	ld (current_direction),a
-	ret
-
-set_direction_left:
-	ld a,LEFT
-	ld (current_direction),a
-	ret

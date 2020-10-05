@@ -26,6 +26,7 @@ stack_top db 0
 	include 'retrotools\keycacher.asm'
 	include 'retrotools\tools.asm'
 	include 'enemy.asm'
+	include 'bullet.asm'
 
 
     SAVENEX OPEN "main.nex", start, stack_top
