@@ -82,7 +82,12 @@ bullet_draw:
 	out (c), a                                      
     ;attr 2
 	ld a, BULLET_ATTR_2
-	out (c), a
+	ld b,a
+	ld hl,bx
+	inc hl
+	ld a,(hl)
+	or b
+	out (c),a
 	;attr 3
     ld a,(bullet_alive)
     cp TRUE

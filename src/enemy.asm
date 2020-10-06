@@ -5,6 +5,12 @@ INVADER equ 2
 
 
 
+enemy_direction db RIGHT
+ENEMY_SPEED equ 2
+
+ENEMY_MIN_X equ 32 ;X8 not set
+ENEMY_MAX_X equ 17 ;X8 set
+
 
 
 ;attr_3,x,y, attri slot, 
@@ -48,6 +54,7 @@ e_update:
 
 	;Update Loop:
 	call enemy_check_collision_bullet
+	call enemy_move
 
 e_update_next:
 	ld de,ENEMIES_DATA_LENGTH
@@ -79,7 +86,10 @@ e_draw:
 	out (c), a                                      
     ;attr 2
 	ld a, ENEMY_ATTR_2
-	out (c), a
+	ld b,a
+	ld a,(ix+3)
+	or b
+	out (c),a
 	;attr 3
 	ld a,(ix)
 	out (c),a
@@ -133,6 +143,14 @@ enemy_check_collision_bullet:
     cp b
     ret c
 
+	ld a,(ix+3)
+	ld b,a
+	ld hl,bx
+	inc hl
+	ld a,(hl)
+	cp b
+	ret nz
+
     ; collision...
     call enemy_kill
 	call bullet_kill
@@ -151,4 +169,66 @@ enemy_kill:
 	call 0x229b
 	
 	ld (ix),DEAD
+	ret
+
+enemy_move:
+	ld a,(enemy_direction)
+	cp LEFT
+	jp z,enemy_move_left
+	cp RIGHT
+	jp z,enemy_move_right
+	ret
+
+
+enemy_move_left:
+	ld a,(ix+3)
+	bit 0,a
+	jp z,e_check_left_edge
+e_do_move_left:
+	ld hl,(ix+2)
+	ld de,-ENEMY_SPEED
+	add hl,de
+	ld (ix+2),hl
+	ret
+e_check_left_edge:
+	ld a,(ix+2)
+	cp ENEMY_MIN_X
+	jp c,enemy_toggle_direction
+	jp e_do_move_left
+
+
+
+enemy_move_right:
+	ld a,(ix+3)
+	bit 0,a
+	jp nz,e_check_right_edge
+e_do_move_right:
+	ld hl,(ix+2)
+	ld de,ENEMY_SPEED
+	add hl,de
+	ld (ix+2),hl
+	ret
+e_check_right_edge:
+	ld a,(ix+2)
+	cp ENEMY_MAX_X
+	jp nc,enemy_toggle_direction
+	jp e_do_move_right
+
+
+enemy_toggle_direction:
+	ld a,(enemy_direction)
+	cp RIGHT
+	jp z,enemy_set_direction_left
+	cp LEFT
+	jp z,enemy_set_direction_right
+	ret
+
+enemy_set_direction_left:
+	ld a,LEFT
+	ld (enemy_direction),a
+	ret
+
+enemy_set_direction_right:
+	ld a,RIGHT
+	ld (enemy_direction),a
 	ret

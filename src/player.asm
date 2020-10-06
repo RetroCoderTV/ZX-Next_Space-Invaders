@@ -12,6 +12,9 @@ player_attribute_3 db %11000000
 player_attribute_4 db %00100000
 
 
+GUTTER equ 32
+
+
 player_update:
 	call increment_anim_frame
 
@@ -91,18 +94,41 @@ player_draw:
 	ret
 
 move_right:
+	ld hl,px
+	inc hl
+	ld a,(hl)
+	bit 0,a
+	jp nz,check_right_edge
+do_move_right:
 	ld hl,(px)
 	ld de,PLAYER_SPEED
 	add hl,de
 	ld (px),hl
-
 	ret
+check_right_edge:
+	dec hl
+	ld a,(hl)
+	cp 12 ;screen right
+	ret nc
+	jp do_move_right
 
 
 move_left:
+	ld hl,px
+	inc hl
+	ld a,(hl)
+	bit 0,a
+	jp z,check_left_edge	
+do_move_left:
 	ld hl,(px)
 	ld de,-PLAYER_SPEED
 	add hl,de
 	ld (px),hl
 	ret
-
+check_left_edge:
+	dec hl
+	ld a,(hl)
+	cp GUTTER+5
+	ret c
+	jp do_move_left
+	

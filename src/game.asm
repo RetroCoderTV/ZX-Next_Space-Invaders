@@ -1,4 +1,6 @@
 game_start: 
+	; nextreg $15,%00000011
+		
     call background_paint
 
 	ld b,SPRITE_COUNT
@@ -8,9 +10,9 @@ game_start:
     ret
 
 game_update:
-    ld bc,WAITING_TIME
-	call wait
-	
+	ld b,1
+	call WaitRasterLine
+  	
     call check_keys
 
 	call bullet_update
