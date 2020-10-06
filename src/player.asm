@@ -1,16 +1,12 @@
 current_anim_frame db 0
 TOTAL_ANIM_FRAMES equ 2
 
-PLAYER_Y equ 191-16
-px db 160
+PLAYER_Y equ 191
+px dw 160
 
 
-ANCHORED equ %00100000
-VISIBILITY equ %10000000
-EXTENDED equ %01000000
-MIRROR_X equ %00001000
-MIRROR_Y equ %00000100
-
+PLAYER_SPEED equ 2
+PLAYER_ATTR_SLOT equ 127
 player_attribute_2 db %00000000
 player_attribute_3 db %11000000
 player_attribute_4 db %00100000
@@ -18,6 +14,10 @@ player_attribute_4 db %00100000
 
 player_update:
 	call increment_anim_frame
+
+	ld a,(keypressed_Space)
+	cp TRUE
+	call z, fire_photon_torpedos
 
 	ld a,(keypressed_A)
     cp TRUE
@@ -27,9 +27,7 @@ player_update:
 	cp TRUE
 	jp z,move_right
 
-	ld a,(keypressed_Space)
-	cp TRUE
-	jp z, fire_photon_torpedos
+	
 
     ret
 
@@ -38,6 +36,9 @@ player_update:
 
 
 fire_photon_torpedos:
+	ld a,(keypressed_Space_Held)
+	cp TRUE
+	ret z
 	call bullet_spawn
 	ret
 
@@ -57,13 +58,13 @@ increment_anim_frame:
 
 player_draw:
 	;select slot
-	ld a,0
+	ld a,PLAYER_ATTR_SLOT
 	ld bc, $303b ;selection of pattern
 	out (c), a
 
 	ld bc, $57 ;0x57=attribute writing port
 	;attr 0
-	ld a, (px)
+	ld a,(px)
 	out (c), a    
 
 	;attr 1                                  
@@ -72,6 +73,11 @@ player_draw:
 
 	;attr 2
 	ld a,(player_attribute_2)
+	ld b,a
+	ld hl,px
+	inc hl
+	ld a,(hl)
+	or b
 	out (c),a
 
 	;attr 3
@@ -85,19 +91,18 @@ player_draw:
 	ret
 
 move_right:
-	ld a,(px)
-	add a,1
-	cp 250
-	ret nc
-	ld (px),a
+	ld hl,(px)
+	ld de,PLAYER_SPEED
+	add hl,de
+	ld (px),hl
+
 	ret
 
 
 move_left:
-	ld a,(px)
-	sub 1
-	cp 8
-	ret c
-	ld (px),a
+	ld hl,(px)
+	ld de,-PLAYER_SPEED
+	add hl,de
+	ld (px),hl
 	ret
 

@@ -1,8 +1,7 @@
     org 0x6000
 
     DEVICE ZXSPECTRUMNEXT
-    CSPECTMAP "project.map"
-
+	
 start:
 	call game_start	
 
@@ -24,6 +23,7 @@ stack_top db 0
 	include 'sprites.asm'
 	include 'player.asm'
 	include 'retrotools\keycacher.asm'
+	include 'retrotools\spritetools.asm'
 	include 'retrotools\tools.asm'
 	include 'enemy.asm'
 	include 'bullet.asm'

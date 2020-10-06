@@ -1,8 +1,10 @@
 game_start: 
     call background_paint
 
-    
+	ld b,SPRITE_COUNT
+    ld hl,Sprite0
     call init_sprites
+	
     ret
 
 game_update:
@@ -13,32 +15,22 @@ game_update:
 
 	call bullet_update
 	call player_update
+	call enemy_update
 
 
 	ret
 
 game_draw:
-    call enemy_draw
+    
 	call bullet_draw
 	call player_draw
+	call enemy_draw
     
 	ret
 
 
-init_sprites:
-	ld a,0							
-	ld bc,$303b					
-	out (c),a
-						
-	ld b,SPRITE_COUNT	
-	ld hl,Sprite0
-is_loop:
-	push bc							
-	ld bc,$005b						
-	otir							
-	pop bc 							
-	djnz is_loop					
-	ret 							
+
+
 
 
 
