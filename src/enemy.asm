@@ -1,7 +1,8 @@
 
 ;Enemy sprite types:
-FACE equ 1
-INVADER equ 2
+FACE equ 62
+INVADER equ 59
+HAT equ 52
 
 
 
@@ -15,40 +16,45 @@ ENEMY_MAX_X equ 17 ;X8 set
 
 ;attr_3,x,y, attri slot, 
 enemies:
-    dw VISIBILITY+7,32,60,1
-    dw VISIBILITY+7,64,60,2
-    dw VISIBILITY+7,96,60,3
-    dw VISIBILITY+7,128,60,4
-    dw VISIBILITY+7,160,60,5
-    dw VISIBILITY+7,192,60,6
-    dw VISIBILITY+7,224,60,7
-    dw VISIBILITY+6,32,80,8
-    dw VISIBILITY+6,64,80,9
-    dw VISIBILITY+6,96,80,10
-    dw VISIBILITY+6,128,80,11
-    dw VISIBILITY+6,160,80,12
-    dw VISIBILITY+6,192,80,13
-    dw VISIBILITY+6,224,80,14
-	dw VISIBILITY+5,32,100,15
-    dw VISIBILITY+5,64,100,16
-    dw VISIBILITY+5,96,100,17
-    dw VISIBILITY+5,128,100,18
-    dw VISIBILITY+5,160,100,19
-    dw VISIBILITY+5,192,100,20
-    dw VISIBILITY+5,224,100,21
+    dw VISIBILITY+INVADER,32,60,1
+    dw VISIBILITY+INVADER,64,60,2
+    dw VISIBILITY+INVADER,96,60,3
+    dw VISIBILITY+INVADER,128,60,4
+    dw VISIBILITY+INVADER,160,60,5
+    dw VISIBILITY+INVADER,192,60,6
+    dw VISIBILITY+INVADER,224,60,7
+    dw VISIBILITY+FACE,32,80,8
+    dw VISIBILITY+FACE,64,80,9
+    dw VISIBILITY+FACE,96,80,10
+    dw VISIBILITY+FACE,128,80,11
+    dw VISIBILITY+FACE,160,80,12
+    dw VISIBILITY+FACE,192,80,13
+    dw VISIBILITY+FACE,224,80,14
+	dw VISIBILITY+HAT,32,100,15
+    dw VISIBILITY+HAT,64,100,16
+    dw VISIBILITY+HAT,96,100,17
+    dw VISIBILITY+HAT,128,100,18
+    dw VISIBILITY+HAT,160,100,19
+    dw VISIBILITY+HAT,192,100,20
+    dw VISIBILITY+HAT,224,100,21
 	dw 255
 ENEMIES_DATA_LENGTH equ 4*2
-
 ENEMY_ATTR_2 equ 0
+
+
+enemy_need_toggle db FALSE
 
 
 
 enemy_update:
+	ld a,FALSE
+	ld (enemy_need_toggle),a
+
 	ld ix,enemies
 e_update:
 	ld a,(ix)
 	cp 255
-	ret z
+	jp z, e_update_end
 	cp DEAD
 	jp z,e_update_next
 
@@ -60,6 +66,11 @@ e_update_next:
 	ld de,ENEMIES_DATA_LENGTH
 	add ix,de
 	jp e_update
+e_update_end:
+	ld a,(enemy_need_toggle)
+	cp TRUE
+	call z,enemy_toggle_direction
+	ret
 	
 
 
@@ -110,6 +121,10 @@ e_draw_next:
 
 ;IX=current enemy
 enemy_check_collision_bullet:
+	ld a,(bullet_alive)
+	cp TRUE
+	ret nz
+
     ;passed the right side of enemy
     ld a,(bx)
 	add a,6 ;bullet transparency offset
@@ -193,7 +208,7 @@ e_do_move_left:
 e_check_left_edge:
 	ld a,(ix+2)
 	cp ENEMY_MIN_X
-	jp c,enemy_toggle_direction
+	call c,enemy_set_need_toggle
 	jp e_do_move_left
 
 
@@ -211,9 +226,16 @@ e_do_move_right:
 e_check_right_edge:
 	ld a,(ix+2)
 	cp ENEMY_MAX_X
-	jp nc,enemy_toggle_direction
+	call nc,enemy_set_need_toggle
 	jp e_do_move_right
 
+
+
+enemy_set_need_toggle:
+	ld a,TRUE
+	ld (enemy_need_toggle),a
+
+	ret
 
 enemy_toggle_direction:
 	ld a,(enemy_direction)

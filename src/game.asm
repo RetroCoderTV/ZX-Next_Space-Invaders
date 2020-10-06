@@ -4,7 +4,7 @@ game_start:
     call background_paint
 
 	ld b,SPRITE_COUNT
-    ld hl,Sprite0
+    ld hl,rpg_pack1
     call init_sprites
 	
     ret
