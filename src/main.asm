@@ -29,11 +29,12 @@ stack_top db 0
 	include 'enemy.asm'
 	include 'bullet.asm'
 
-	MMU 7 n,0x20*2
+
+	MMU 7 n,0x20*2 ;MMU <first slot number> [<last slot number>|<single slot option>], <page number>[,<address>]
 	org 0xE000
 	incbin "space.bmp",1078
 
-	MMU 7 n,0x23*2
+	MMU 7 n,0x23*2 ;MMU <first slot number> [<last slot number>|<single slot option>], <page number>[,<address>]
 	org 0xE000
 	incbin "space2.bmp",1078
 
