@@ -4,8 +4,10 @@ by dw 0
 bullet_slot db 126
 BULLET_DATA_LENGTH equ 4*2
 
+BULLET_IMAGE equ 2
+
 BULLET_ATTR_2 equ 0
-BULLET_ATTR_3 equ %10000100
+BULLET_ATTR_3 equ VISIBILITY+BULLET_IMAGE
 BULLET_ATTR_3_DEAD equ %00000100
 
 BULLET_SPEED equ 3
@@ -18,7 +20,6 @@ bullet_spawn:
     cp TRUE
     ret z
 
-
     ; spawn a bullet now...
     ld a,TRUE
     ld (bullet_alive),a
@@ -28,8 +29,6 @@ bullet_spawn:
 
     ld hl,PLAYER_Y
     ld (by),hl
-
-    ; BREAKPOINT
 
     ret
 

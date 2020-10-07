@@ -1,11 +1,13 @@
 game_start: 
-	; nextreg $15,%00000011
+	
 		
-    call background_paint
+    call background_start
 
 	ld b,SPRITE_COUNT
     ld hl,rpg_pack1
     call init_sprites
+
+	
 	
     ret
 
@@ -14,7 +16,7 @@ game_update:
 	call WaitRasterLine
   	
     call check_keys
-
+	call background_update
 	call bullet_update
 	call player_update
 	call enemy_update
@@ -29,11 +31,6 @@ game_draw:
 	call enemy_draw
     
 	ret
-
-
-
-
-
 
 
 

@@ -4,51 +4,70 @@ FACE equ 62
 INVADER equ 59
 HAT equ 52
 
-
+ENEMY_PALETTE equ %00000000
 
 enemy_direction db RIGHT
-ENEMY_SPEED equ 2
+ENEMY_SPEED equ 8
 
 ENEMY_MIN_X equ 32 ;X8 not set
 ENEMY_MAX_X equ 17 ;X8 set
 
 
 
+
+
+
 ;attr_3,x,y, attri slot, 
 enemies:
-    dw VISIBILITY+INVADER,32,60,1
-    dw VISIBILITY+INVADER,64,60,2
-    dw VISIBILITY+INVADER,96,60,3
-    dw VISIBILITY+INVADER,128,60,4
-    dw VISIBILITY+INVADER,160,60,5
-    dw VISIBILITY+INVADER,192,60,6
-    dw VISIBILITY+INVADER,224,60,7
-    dw VISIBILITY+FACE,32,80,8
-    dw VISIBILITY+FACE,64,80,9
-    dw VISIBILITY+FACE,96,80,10
-    dw VISIBILITY+FACE,128,80,11
-    dw VISIBILITY+FACE,160,80,12
-    dw VISIBILITY+FACE,192,80,13
-    dw VISIBILITY+FACE,224,80,14
-	dw VISIBILITY+HAT,32,100,15
-    dw VISIBILITY+HAT,64,100,16
-    dw VISIBILITY+HAT,96,100,17
-    dw VISIBILITY+HAT,128,100,18
-    dw VISIBILITY+HAT,160,100,19
-    dw VISIBILITY+HAT,192,100,20
-    dw VISIBILITY+HAT,224,100,21
+    dw VISIBILITY+INVADER,32,	20,1
+    dw VISIBILITY+INVADER,64,	20,2
+    dw VISIBILITY+INVADER,96,	20,3
+    dw VISIBILITY+INVADER,128,	20,4
+    dw VISIBILITY+INVADER,160,	20,5
+    dw VISIBILITY+INVADER,192,	20,6
+    dw VISIBILITY+INVADER,224,	20,7
+    dw VISIBILITY+FACE,32,		40,8
+    dw VISIBILITY+FACE,64,		40,9
+    dw VISIBILITY+FACE,96,		40,10
+    dw VISIBILITY+FACE,128,		40,11
+    dw VISIBILITY+FACE,160,		40,12
+    dw VISIBILITY+FACE,192,		40,13
+    dw VISIBILITY+FACE,224,		40,14
+	dw VISIBILITY+HAT,32,		60,15
+    dw VISIBILITY+HAT,64,		60,16
+    dw VISIBILITY+HAT,96,		60,17
+    dw VISIBILITY+HAT,128,		60,18
+    dw VISIBILITY+HAT,160,		60,19
+    dw VISIBILITY+HAT,192,		60,20
+    dw VISIBILITY+HAT,224,		60,21
 	dw 255
 ENEMIES_DATA_LENGTH equ 4*2
 ENEMY_ATTR_2 equ 0
 
 
 enemy_need_toggle db FALSE
+enemy_need_movedown db FALSE
 
+
+ENEMY_MIN_INTERVAL equ 17
+enemy_move_interval db 32
+enemy_move_counter db 0
+enemy_moved db FALSE
+
+
+
+ENEMY_INTERVAL_DECREASE equ 4
+ENEMY_DOWNWARD_AMOUNT equ 8
 
 
 enemy_update:
 	ld a,FALSE
 	ld (enemy_need_toggle),a
+	ld (enemy_moved),a
+
+	ld a,(enemy_move_counter)
+	add a,1
+	ld (enemy_move_counter),a
 
 	ld ix,enemies
 e_update:
@@ -59,20 +78,42 @@ e_update:
 	jp z,e_update_next
 
 	;Update Loop:
+	
+
+	ld a,(enemy_move_interval)
+	ld b,a
+	ld a,(enemy_move_counter)
+	cp b
+	call nc, enemy_move
+
+	ld a,(enemy_need_movedown)
+	cp TRUE
+	call z, enemy_move_down
+
 	call enemy_check_collision_bullet
-	call enemy_move
 
 e_update_next:
 	ld de,ENEMIES_DATA_LENGTH
 	add ix,de
 	jp e_update
 e_update_end:
+	ld a,FALSE
+	ld (enemy_need_movedown),a
+
 	ld a,(enemy_need_toggle)
 	cp TRUE
 	call z,enemy_toggle_direction
+
+	ld a,(enemy_moved)
+	cp TRUE
+	call z,enemy_reset_move_counter
 	ret
 	
 
+enemy_reset_move_counter:
+	xor a
+	ld (enemy_move_counter),a
+	ret
 
 
 
@@ -97,6 +138,7 @@ e_draw:
 	out (c), a                                      
     ;attr 2
 	ld a, ENEMY_ATTR_2
+	or ENEMY_PALETTE
 	ld b,a
 	ld a,(ix+3)
 	or b
@@ -109,11 +151,7 @@ e_draw_next:
     ld de,ENEMIES_DATA_LENGTH
 	add ix,de
 	jp e_draw
-
-
-
-
-
+;
 
 
 
@@ -171,29 +209,35 @@ enemy_check_collision_bullet:
 	call bullet_kill
 
 	ret
-
-
-
+;
 
 enemy_kill:
 	ld a,(ix)
 	bit 7,a
 	ret z
 
-	ld a,7
-	call 0x229b
-	
 	ld (ix),DEAD
-	ret
 
+	call background_start2
+
+	ret
+;
 enemy_move:
 	ld a,(enemy_direction)
 	cp LEFT
-	jp z,enemy_move_left
+	push af
+	call z,enemy_move_left
+	pop af
 	cp RIGHT
-	jp z,enemy_move_right
-	ret
+	push af
+	call z,enemy_move_right
+	pop af
 
+	ld a,TRUE
+	ld (enemy_moved),a
+	
+	ret
+;
 
 enemy_move_left:
 	ld a,(ix+3)
@@ -240,9 +284,29 @@ enemy_set_need_toggle:
 enemy_toggle_direction:
 	ld a,(enemy_direction)
 	cp RIGHT
-	jp z,enemy_set_direction_left
+	push af
+	call z,enemy_set_direction_left
+	pop af
 	cp LEFT
-	jp z,enemy_set_direction_right
+	push af
+	call z,enemy_set_direction_right
+	pop af
+
+	ld a,TRUE
+	ld (enemy_need_movedown),a
+
+	ld a,(enemy_move_interval)
+	cp ENEMY_MIN_INTERVAL
+	ret c
+	sub ENEMY_INTERVAL_DECREASE
+	ld (enemy_move_interval),a
+	ret
+
+enemy_move_down:
+	ld a,(ix+4)
+	add a,ENEMY_DOWNWARD_AMOUNT
+	ld (ix+4),a
+
 	ret
 
 enemy_set_direction_left:

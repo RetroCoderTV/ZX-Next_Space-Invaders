@@ -17,6 +17,7 @@ STACK_SIZE equ 20
 stack_bottom ds STACK_SIZE, 0
 stack_top db 0  
 
+
 	include 'background.asm'
 	include 'constants.asm'
 	include 'game.asm'
@@ -28,9 +29,18 @@ stack_top db 0
 	include 'enemy.asm'
 	include 'bullet.asm'
 
+	MMU 7 n,0x20*2
+	org 0xE000
+	incbin "space.bmp",1078
 
-    SAVENEX OPEN "main.nex", start, stack_top
-    SAVENEX CORE 2,0,0 ;Next core 2.0.0 required as minimum
-    SAVENEX CFG 4 ;Border color (seems to not work!!)
-    SAVENEX AUTO
-    SAVENEX CLOSE
+	MMU 7 n,0x23*2
+	org 0xE000
+	incbin "space2.bmp",1078
+
+
+	SAVENEX OPEN "main.nex", start , stack_top
+    SAVENEX CORE 3, 0, 0      
+    SAVENEX CFG 0, 0            
+	SAVENEX AUTO
+    SAVENEX CLOSE 
+
